@@ -31,6 +31,7 @@ function CoreLibrary:WriteLog(...)
 end
 
 function FileLibrary:AttachWatchHandler(Object)
+	print("THE AUTOUPDATER WORKED!!!!!!!!!!!!!!!!!!!!!")
 	-- First we're going to check if it exists already
 	if not Object then return end 
 	
