@@ -6,6 +6,7 @@ local Logs = {}
 
 local VerKey = "" 
 
+-- Function to check if the keys match up 
 local function SecureConnection(Key)
 	if (VerKey ~= "") and (Key == VerKey) then
 		return true 
@@ -14,6 +15,7 @@ local function SecureConnection(Key)
 	end
 end
 
+-- This allows the host plugin to write a new key that the library will require. This is hardcoded to only be ran ONCE! 
 function CoreLibrary:Secure(Key, Toolbar)
 	if VerKey == "" then
 		VerKey = Key 
@@ -23,8 +25,8 @@ function CoreLibrary:Secure(Key, Toolbar)
 	end
 end
 
+-- Writes all input to a log that will be accessable in the UI (waiting for the new plugin UI upgrade)
 function CoreLibrary:WriteLog(Key, ...)
-
 	-- This small tool is to make sure it's the host process reaching us and not an imposter
 	local Verify = SecureConnection(Key)
 	if not (Verify == true) then print(Verify) return Verify end 
@@ -36,8 +38,8 @@ function CoreLibrary:WriteLog(Key, ...)
 	table.insert(Logs, 1, Str) 
 end
 
+-- This will 
 function FileLibrary:AttachWatchHandler(Key, Object)
-
 	-- This small tool is to make sure it's the host process reaching us and not an imposter
 	local Verify = SecureConnection(Key)
 	if not (Verify == true) then print(Verify) return Verify end 
@@ -48,19 +50,15 @@ function FileLibrary:AttachWatchHandler(Key, Object)
 	for _,Handler in ipairs(ExistingFileConnections) do 
 		local PotentialObject = Handler[1]
 		if PotentialObject == Object then 
-			print("Killing duplicate object")
+			print("Killing duplicate object") -- DEBUG: NEVER GET THIS PRINT
 			return -- This will kill the function 
 		end
 	end
 	
 	-- If we're this far, it means it doesn't exist already
-
 	local NewConnection = Object.ChildAdded:Connect(function(Child)
-		--CoreLibrary:WriteLog("New child detected...",Child.Name,"in",Object.Name)
+		CoreLibrary:WriteLog(Key, "New child detected...",Child.Name,"in",Object.Name)
 		FileLibrary:ScanDirectory(Key, Child)
-		if Child.ClassName == "Script" then 
-			CoreLibrary:WriteLog(Key, "SCRIPT DETECTED",Child.Name,Object.Name)
-		end
 	end)
 	table.insert(ExistingFileConnections,{Object.Name, NewConnection})
 end
@@ -93,7 +91,10 @@ function FileLibrary:ScanDirectory(Key, Dir,Gui)
 	end
 	
 	Recur(Dir)
+
+	-- Back to tower!
 	return ExistingFileConnections
 end
 
+-- Ugly:
 return {FileShield=FileLibrary;NetworkShield=NetLibrary;Core=CoreLibrary}
