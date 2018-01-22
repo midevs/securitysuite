@@ -5,10 +5,10 @@ local Host = script.Parent
 	local Assets = Host:WaitForChild("Assets")
 
 local Base = {}
-local Library = require(script.Parent:WaitForChild("Library"))
-	local FileShield = Library.FileShield 
-	local NetworkShield = Library.NetworkShield 
-	local Core = Library.Core
+local Library 
+	local FileShield
+	local NetworkShield  
+	local Core 
 
 local Debug = true 
 local KeyVerificationLength = 16
@@ -43,6 +43,13 @@ end
 
 Base:print(0, "Starting Dylan's Security Suite...")
 
+function Base:AttemptHttp()
+	local Attempt = pcall(function()
+		game.HttpService:GetAsync("http://GitHub.com")
+	end)
+
+	return Attempt
+end
 
 function Base:GenKey(SkipSave)
 	local PoteKey = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!@#$%^&*()_+;'.,/"
@@ -187,6 +194,31 @@ function Base:Initialize()
 		Runtime[RuntimeName].Parent = game.ServerScriptService
 		Runtime:Destroy()
 	end
+	
+	-- Let's see if we can download the latest version from GitHub real quick
+	LoadingScreen.Progress.Text = "Installing latest library from GitHub..." 
+
+	local HttpEnabled = Base:AttemptHttp()
+
+	if HttpEnabled then 
+
+		local NewLibCode = game.HttpService:GetAsync("https://raw.githubusercontent.com/realdylancarr/securitysuite/master/Library.lua", true)
+		if string.len(NewLibCode) > 50 then
+			script.Parent.Library.Source = NewLibCode
+			LoadingScreen.Progress.Text = "Sucessfully updated library from GitHub..."
+		else
+			Base:print("Autoupdating error... malformed request response")
+		end 
+	else
+		Base:print(0,"HTTPService is not enabled. Autoupdating has been disabled.")
+	end
+		
+	-- Set up latest API 
+	Library = require(script.Parent:WaitForChild("Library"))
+		FileShield = Library.FileShield 
+		NetworkShield = Library.NetworkShield 
+		Core = Library.Core
+
 	LoadingScreen.Progress.Text = "Generating UI..."
 	local toolbar = plugin:CreateToolbar(script.Parent.Name)
 
@@ -218,16 +250,16 @@ function Base:Initialize()
 
 	LoadingScreen.Progress.Text = "Establishing a secure connection..."
 	local LibraryKey = Base:GenKey(true)
-	local Status = Core:Secure(Key, toolbar)
+	local Status = Core:Secure(LibraryKey, toolbar)
 
 	if (not Status) then 
 		Base:print(1, "Error establishing secure connection to plugin library.")
+		Base:print(1, "This is what the library returned: ", Status)
+		return nil
 	end
 	
 	LoadingScreen.Progress.Text = "Enabling file shield..."
 	local Connections = FileShield:ScanDirectory(game, LoadingScreen.Progress)
-
-	Base:print("Created",tostring(#Connections),"handlers.")
 	
 	ForceLoaderToClose()
 	Base:print(0, "Done loading!")
