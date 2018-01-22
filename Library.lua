@@ -33,7 +33,7 @@ function CoreLibrary:WriteLog(Key, ...)
 	for _,DataPoint in ipairs({...}) do
 		Str = Str .. " " .. DataPoint
 	end
-	table.insert(Logs, Str, 1) 
+	table.insert(Logs, 1, Str) 
 end
 
 function FileLibrary:AttachWatchHandler(Key, Object)
