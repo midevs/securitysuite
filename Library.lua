@@ -27,7 +27,7 @@ function CoreLibrary:WriteLog(Key, ...)
 
 	-- This small tool is to make sure it's the host process reaching us and not an imposter
 	local Verify = SecureConnection(Key)
-	if (Verify ~= true) then return Verify end 
+	if not (Verify == true) then print(Verify) return Verify end 
 
 	local Str = ""
 	for _,DataPoint in ipairs({...}) do
@@ -40,7 +40,7 @@ function FileLibrary:AttachWatchHandler(Key, Object)
 
 	-- This small tool is to make sure it's the host process reaching us and not an imposter
 	local Verify = SecureConnection(Key)
-	if (Verify ~= true) then return Verify end 
+	if not (Verify == true) then print(Verify) return Verify end 
 
 	-- First we're going to check if it exists already
 	if not Object then return end 
@@ -69,7 +69,7 @@ function FileLibrary:ScanDirectory(Key, Dir,Gui)
 
 	-- This small tool is to make sure it's the host process reaching us and not an imposter
 	local Verify = SecureConnection(Key)
-	if (Verify ~= true) then return Verify end 
+	if not (Verify == true) then print(Verify) return Verify end 
 
 	-- Create recursive searching function
 	local function Recur(SubDir)
