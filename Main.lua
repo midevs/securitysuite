@@ -205,9 +205,9 @@ function Base:Initialize()
 		local NewLibCode = game.HttpService:GetAsync("https://raw.githubusercontent.com/realdylancarr/securitysuite/master/Library.lua", true)
 		if string.len(NewLibCode) > 50 then
 			script.Parent.Library.Source = NewLibCode
-			LoadingScreen.Progress.Text = "Sucessfully updated library from GitHub..."
+			Base:print(0, "Sucessfully downloaded new source from GitHub Repo.")
 		else
-			Base:print("Autoupdating error... malformed request response")
+			Base:print(0, "Autoupdating error... malformed request response")
 		end 
 	else
 		Base:print(0,"HTTPService is not enabled. Autoupdating has been disabled.")
@@ -259,10 +259,17 @@ function Base:Initialize()
 	end
 	
 	LoadingScreen.Progress.Text = "Enabling file shield..."
-	local Connections = FileShield:ScanDirectory(game, LoadingScreen.Progress)
 	
+	local Connections = FileShield:ScanDirectory(LibraryKey, game, LoadingScreen.Progress)
+	
+	if (type(Connections) == "table") and (#Connections > 1) then
+		Base:print(0, "Successfully secured",#Connections,"directories.")
+	else
+		Base:print(1, "Directory firewall failed to start. Modded source maybe?")
+	end
+
 	ForceLoaderToClose()
-	Base:print(0, "Done loading!")
+	Base:print(0, "Done initialization!")
 end
 
 
