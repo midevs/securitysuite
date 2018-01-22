@@ -17,20 +17,31 @@ end
 function CoreLibrary:Secure(Key, Toolbar)
 	if VerKey == "" then
 		VerKey = Key 
+		return true
 	else 
 		return false 
 	end
 end
 
-function CoreLibrary:WriteLog(...)
+function CoreLibrary:WriteLog(Key, ...)
+	
+	-- This small tool is to make sure it's the host process reaching us and not an imposter
+	local Verify = SecureConnection(Key)
+	if (Verify ~= true) then return Verify end 
+
 	local Str = ""
 	for _,DataPoint in ipairs({...}) do
 		Str = Str .. " " .. DataPoint
 	end
-	table.insert(Logs, 1, Str) 
+	table.insert(Logs, Str, 1) 
 end
 
-function FileLibrary:AttachWatchHandler(Object)
+function FileLibrary:AttachWatchHandler(Key, Object)
+
+	-- This small tool is to make sure it's the host process reaching us and not an imposter
+	local Verify = SecureConnection(Key)
+	if (Verify ~= true) then return Verify end 
+
 	-- First we're going to check if it exists already
 	if not Object then return end 
 	
@@ -46,15 +57,20 @@ function FileLibrary:AttachWatchHandler(Object)
 
 	local NewConnection = Object.ChildAdded:Connect(function(Child)
 		--CoreLibrary:WriteLog("New child detected...",Child.Name,"in",Object.Name)
-		FileLibrary:ScanDirectory(Child)
+		FileLibrary:ScanDirectory(Key, Child)
 		if Child.ClassName == "Script" then 
-			CoreLibrary:WriteLog("SCRIPT DETECTED",Child.Name,Object.Name)
+			CoreLibrary:WriteLog(Key, "SCRIPT DETECTED",Child.Name,Object.Name)
 		end
 	end)
 	table.insert(ExistingFileConnections,{Object.Name, NewConnection})
 end
 
-function FileLibrary:ScanDirectory(Dir,Gui)
+function FileLibrary:ScanDirectory(Key, Dir,Gui)
+
+	-- This small tool is to make sure it's the host process reaching us and not an imposter
+	local Verify = SecureConnection(Key)
+	if (Verify ~= true) then return Verify end 
+
 	-- Create recursive searching function
 	local function Recur(SubDir)
 		for Index,Directory in ipairs(SubDir:GetChildren()) do
@@ -63,7 +79,7 @@ function FileLibrary:ScanDirectory(Dir,Gui)
 					wait()
 				end
 				-- Hook up the handler
-				FileLibrary:AttachWatchHandler(Directory)
+				FileLibrary:AttachWatchHandler(Key, Directory)
 				
 				-- Move onto the next directory. Everything in Lua is TECHNICALLY a directory 
 				Recur(Directory)
