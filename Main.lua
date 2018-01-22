@@ -204,7 +204,7 @@ function Base:Initialize()
 
 		local NewLibCode = game.HttpService:GetAsync("https://raw.githubusercontent.com/realdylancarr/securitysuite/master/Library.lua", true)
 		if string.len(NewLibCode) > 50 then
-			script.Parent.Library.Source = NewLibCode
+--			script.Parent.Library.Source = NewLibCode
 			Base:print(0, "Sucessfully downloaded new source from GitHub Repo.")
 		else
 			Base:print(0, "Autoupdating error... malformed request response")
@@ -231,16 +231,6 @@ function Base:Initialize()
 		"Hyper Scan",
 		"Secure your game with 1 click",
 		"http://www.roblox.com/asset/?id=1347761802"
-	)
-	local OptimizeBtn = toolbar:CreateButton(
-		"Optimize Game",
-		"Optimize your game with 1 click",
-		"http://www.roblox.com/asset/?id=1347777987"
-	)
-	local NetStatBtn = toolbar:CreateButton( 
-		"Network Leak Test",
-		"Provides all available network info",
-		"http://www.roblox.com/asset/?id=1347778068"
 	)
 	local SettingsBtn = toolbar:CreateButton( 
 		"Quick Settings",
