@@ -8,6 +8,7 @@ local VerKey = ""
 
 local function SecureConnection(Key)
 	if (VerKey ~= "") and (Key == VerKey) then
+		print("ITS REAL BRUH")
 		return true 
 	else
 		return "Permission denied"
@@ -24,7 +25,7 @@ function CoreLibrary:Secure(Key, Toolbar)
 end
 
 function CoreLibrary:WriteLog(Key, ...)
-	
+
 	-- This small tool is to make sure it's the host process reaching us and not an imposter
 	local Verify = SecureConnection(Key)
 	if (Verify ~= true) then return Verify end 
