@@ -5,15 +5,11 @@ local Host = script.Parent
 	local Assets = Host:WaitForChild("Assets")
 
 local Base = {}
-local Library 
-	local FileShield
-	local NetworkShield  
-	local Core 
 
 local Debug = true 
 local KeyVerificationLength = 16
-local LocalStoragePairString = "DylsSecuritySuiteData [DO NOT REMOVE]"
-local RuntimeName = "D's  Security Suite Server-Side"
+local LocalStoragePairString = "DylsSecuritySuiteData [DO NOT REMOVE]" -- lol 
+local RuntimeName = "D's Security Suite Server-Side"
 
 -- Plugins don't like dictionaries so we're doing a bit of converting magic:
 local DefaultFileData = {
@@ -38,7 +34,7 @@ function Base:print(kill, ...)
 	
 	warn(Str)
 	
-	if kill == 1 then script.Disabled = true end 
+	if kill == 1 then script.Disabled = true end -- this doesn't kill the thread like it's supposed to :(
 end
 
 Base:print(0, "Starting Dylan's Security Suite...")
@@ -51,6 +47,7 @@ function Base:AttemptHttp()
 	return Attempt
 end
 
+-- This function will generate random strings of characters 
 function Base:GenKey(SkipSave)
 	local PoteKey = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!@#$%^&*()_+;'.,/"
 	
@@ -85,6 +82,7 @@ function Base:GenKey(SkipSave)
 	return KeyGen 
 end
 
+-- Find something from /assets
 function Base:LoadAsset(name) 
 	local PossibleMatch = Assets:WaitForChild(name, 1)
 
@@ -95,10 +93,8 @@ function Base:LoadAsset(name)
 	return PossibleMatch:Clone()
 end
 
-
-function Base:Initialize()
-	-- Let's see if we need to put up the splash screen
-	
+-- The main function 
+function Base:Initialize()	
 	-- This ugly stuff is JUST for the UI... :( ----------------------
 	local Container = (game.CoreGui:FindFirstChild("DylsSecurityGui") or Instance.new("ScreenGui")) -- Create or find ScreenGui 
 		Container.Parent = game.CoreGui
@@ -118,7 +114,7 @@ function Base:Initialize()
 		end
 	end
 			
-	-- Animate it! 
+	-- Animate it on a new thread! 
 	spawn(function()
 		while LoadingScreen.Visible == true do wait()
 			LoadingScreen.Spinner.Rotation = LoadingScreen.Spinner.Rotation + 10
@@ -129,7 +125,7 @@ function Base:Initialize()
 	local function ForceLoaderToClose()
 		LoadingScreen.Progress.Text = "Closing loading UI..."
 			
-		-- Delete shaders
+		-- Delete shaders | TODO: make this less bad 
 		for _,Shader in ipairs(Tmp) do
 			Shader:Destroy() 
 		end
@@ -213,52 +209,49 @@ function Base:Initialize()
 		Base:print(0,"HTTPService is not enabled. Autoupdating has been disabled.")
 	end
 		
-	-- Set up latest API 
-	Library = require(script.Parent:WaitForChild("Library"))
-		FileShield = Library.FileShield 
-		NetworkShield = Library.NetworkShield 
-		Core = Library.Core
+	-- Set up latest library calls 
+	local Library = require(script.Parent:WaitForChild("Library"))
+		local FileShield = Library.FileShield 
+		local NetworkShield = Library.NetworkShield 
+		local Core = Library.Core
 
+	-- Going to create the plugin UI now 
 	LoadingScreen.Progress.Text = "Generating UI..."
+
 	local toolbar = plugin:CreateToolbar(script.Parent.Name)
+		local DashBtn = toolbar:CreateButton("Open Dashboard","Click To Open The Security Dashboard","http://www.roblox.com/asset/?id=1347729492")
+		local QuickScanBtn = toolbar:CreateButton("Hyper Scan","Secure your game with 1 click","http://www.roblox.com/asset/?id=1347761802")
+		local SettingsBtn = toolbar:CreateButton("Quick Settings","Quick access to settings","http://www.roblox.com/asset/?id=1347783696")
 
-	local DashBtn = toolbar:CreateButton(
-		"Open Dashboard",
-		"Click To Open The Security Dashboard",
-		"http://www.roblox.com/asset/?id=1347729492"
-	)
-	local QuickScanBtn = toolbar:CreateButton(
-		"Hyper Scan",
-		"Secure your game with 1 click",
-		"http://www.roblox.com/asset/?id=1347761802"
-	)
-	local SettingsBtn = toolbar:CreateButton( 
-		"Quick Settings",
-		"Quick access to settings",
-		"http://www.roblox.com/asset/?id=1347783696"
-	)
-
+	-- Now we want to connect to our library via a key system to make sure it's really us speaking and non an imposter
 	LoadingScreen.Progress.Text = "Establishing a secure connection..."
+
 	local LibraryKey = Base:GenKey(true)
 	local Status = Core:Secure(LibraryKey, toolbar)
 
+	-- See if it went through 
 	if (not Status) then 
 		Base:print(1, "Error establishing secure connection to plugin library.")
 		Base:print(1, "This is what the library returned: ", Status)
 		return nil
 	end
 	
-	LoadingScreen.Progress.Text = "Enabling file shield..."
+	-- Start the function to monitor all the directories 
+	LoadingScreen.Progress.Text = "Enabling Studio firewall..."
 	
 	local Connections = FileShield:ScanDirectory(LibraryKey, game, LoadingScreen.Progress)
 	
+	-- Validate the response
 	if (type(Connections) == "table") and (#Connections > 1) then
 		Base:print(0, "Successfully secured",#Connections,"directories.")
 	else
 		Base:print(1, "Directory firewall failed to start. Modded source maybe?")
 	end
 
+	-- Done! 
 	ForceLoaderToClose()
+
+	-- Ayyy
 	Base:print(0, "Done initialization!")
 end
 
