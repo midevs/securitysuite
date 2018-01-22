@@ -50,7 +50,6 @@ function FileLibrary:AttachWatchHandler(Key, Object)
 	for _,Handler in ipairs(ExistingFileConnections) do 
 		local PotentialObject = Handler[1] --got string value, Object.Name
 		if PotentialObject == Object.Name then  --got instance, Object, attempt to compare Object with a string, will always be false.
-			print("Killing duplicate object") -- DEBUG: NEVER GET THIS PRINT
 			return -- This will kill the function 
 		end
 	end
